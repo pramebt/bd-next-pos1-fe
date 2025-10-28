@@ -24,9 +24,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <head>
+        <title>AdminLTE 3 | Dashboard</title>
+      </head>
+      <body >
         {children}
       </body>
     </html>
