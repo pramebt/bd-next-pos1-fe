@@ -6,6 +6,7 @@ import axios from "axios";
 import config from "@/app/config";
 
 export default function Page() {
+  const [id, setId] = useState(0);
   const [name, setName] = useState("");
   const [remark, setRemark] = useState("");
   const [foodTypes, setFoodTypes] = useState([]);
@@ -14,17 +15,52 @@ export default function Page() {
     fetchData();
   }, []);
 
+  const edit = (item: any) => {
+    setId(item.id);
+    setName(item.name);
+    setRemark(item.remark);
+  };
+
   const handleSave = async () => {
     try {
       const payload = {
         name,
         remark,
+        id: id,
       };
-
-      await axios.post(config.apiServer + "/api/foodType/create", payload);
+      if (id == 0) {
+        await axios.post(config.apiServer + "/api/foodType/create", payload);
+      } else {
+        await axios.put(config.apiServer + "/api/foodType/update/" + id, payload);
+        setId(0);
+    }
       fetchData();
 
       document.getElementById("modalFoodType_btnClose")?.click();
+    } catch (error: any) {
+      Swal.fire({
+        icon: "error",
+        title: "error",
+        text: error.message,
+      });
+    }
+  };
+
+  const handleRemove = async (item: any) => {
+    try {
+      const button = await Swal.fire({
+        title: "ยืนยันการลบ",
+        text: "คุณต้องการลบรายการนี้",
+        icon: "question",
+        showCancelButton: true,
+        showConfirmButton: true,
+      });
+      if (button.isConfirmed) {
+        await axios.delete(
+          config.apiServer + "/api/foodType/remove/" + item.id
+        );
+        fetchData();
+      }
     } catch (error: any) {
       Swal.fire({
         icon: "error",
@@ -73,10 +109,18 @@ export default function Page() {
                 <td>{item.name}</td>
                 <td>{item.remark}</td>
                 <td className="text-center">
-                  <button className="btn btn-primary me-2">
+                  <button
+                   className="btn btn-primary me-2"
+                   data-bs-toggle="modal"
+                   data-bs-target="#modalFoodType"
+                   onClick={() => edit(item)}
+                  >
                     <i className="fa fa-edit"></i>
                   </button>
-                  <button className="btn btn-danger ">
+                  <button
+                    className="btn btn-danger "
+                    onClick={() => handleRemove(item)}
+                  >
                     <i className="fa fa-trash"></i>
                   </button>
                 </td>
