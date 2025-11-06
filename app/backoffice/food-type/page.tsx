@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "../components/Mymodal";
 import Swal from "sweetalert2";
 import axios from "axios";
@@ -8,6 +8,11 @@ import config from "@/app/config";
 export default function Page() {
   const [name, setName] = useState("");
   const [remark, setRemark] = useState("");
+  const [foodTypes, setFoodTypes] = useState([]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleSave = async () => {
     try {
@@ -16,8 +21,10 @@ export default function Page() {
         remark,
       };
 
-      await axios.post(config.apiServer + "/api/foodtype/create", payload);
+      await axios.post(config.apiServer + "/api/foodType/create", payload);
       fetchData();
+
+      document.getElementById("modalFoodType_btnClose")?.click();
     } catch (error: any) {
       Swal.fire({
         icon: "error",
@@ -27,7 +34,19 @@ export default function Page() {
     }
   };
 
-  const fetchData = async () => {};
+  const fetchData = async () => {
+    try {
+      const rows = await axios.get(config.apiServer + "/api/foodType/list");
+      setFoodTypes(rows.data.results);
+    } catch (error: any) {
+      Swal.fire({
+        icon: "error",
+        title: "error",
+        text: error.message,
+      });
+    }
+  };
+
   return (
     <div className="card mt-3">
       <div className="card-header">ประเภทอาหาร/เครื่องดื่ม</div>
@@ -39,6 +58,32 @@ export default function Page() {
         >
           <i className="fa fa-plus me-2"></i>เพิ่มรายการ
         </button>
+
+        <table className="mt-3 table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th style={{ width: "200px" }}>ชื่อ</th>
+              <th>หมายเหตุ</th>
+              <th style={{ width: "110px" }}></th>
+            </tr>
+          </thead>
+          <tbody>
+            {foodTypes.map((item: any) => (
+              <tr>
+                <td>{item.name}</td>
+                <td>{item.remark}</td>
+                <td className="text-center">
+                  <button className="btn btn-primary me-2">
+                    <i className="fa fa-edit"></i>
+                  </button>
+                  <button className="btn btn-danger ">
+                    <i className="fa fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       <Modal id="modalFoodType" title="ประเภทอาหาร/เครื่องดื่ม">
