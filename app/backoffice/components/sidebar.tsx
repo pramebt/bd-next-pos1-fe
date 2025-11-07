@@ -70,6 +70,12 @@ export default function Sidebar() {
                                     <p>ประเภทอาหาร</p>
                                 </Link>
                             </li>
+                            <li className="nav-item">
+                                <Link href="/backoffice/food-size" className="nav-link">
+                                    <i className="nav-icon fas fa-th"></i>
+                                    <p>ขนาดอาหาร</p>
+                                </Link>
+                            </li>
                         </ul>
                     </nav>
                 </div>
