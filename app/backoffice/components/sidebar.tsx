@@ -72,8 +72,14 @@ export default function Sidebar() {
                             </li>
                             <li className="nav-item">
                                 <Link href="/backoffice/food-size" className="nav-link">
-                                    <i className="nav-icon fas fa-th"></i>
+                                    <i className="nav-icon fas fa-list"></i>
                                     <p>ขนาดอาหาร</p>
+                                </Link>
+                            </li>
+                            <li className="nav-item">
+                                <Link href="/backoffice/taste" className="nav-link">
+                                    <i className="nav-icon fas fa-file-alt"></i>
+                                    <p>รสชาติอาหาร</p>
                                 </Link>
                             </li>
                         </ul>

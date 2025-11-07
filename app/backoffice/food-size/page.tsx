@@ -126,7 +126,7 @@ const Page = () => {
             data-bs-target="#modalFoodSize"
             onClick={clearForm}
           >
-            <i className="fa fa-plus"></i> เพิ่มขนาดอาหาร
+            <i className="fa fa-plus me-2"></i> เพิ่มขนาดอาหาร
           </button>
 
           <table className="mt-3 table table-bordered table-striped">
@@ -196,7 +196,7 @@ const Page = () => {
           className="form-control"
           value={moneyAdded}
           type="number"
-          onChange={(e) => setMoneyAdded(parseInt(e.target.value) || 0)}
+          onChange={(e) => setMoneyAdded(parseInt(e.target.value))}
         />
 
         <div className="mt-3">หมายเหตุ</div>
