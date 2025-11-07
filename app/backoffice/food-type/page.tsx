@@ -70,6 +70,14 @@ export default function Page() {
     }
   };
 
+
+  const clearForm = () => {
+    setId(0);
+    setName("");
+    setRemark("");
+  };
+
+
   const fetchData = async () => {
     try {
       const rows = await axios.get(config.apiServer + "/api/foodType/list");
@@ -91,6 +99,7 @@ export default function Page() {
           className="btn btn-primary"
           data-bs-toggle="modal"
           data-bs-target="#modalFoodType"
+          onClick={clearForm}
         >
           <i className="fa fa-plus me-2"></i>เพิ่มรายการ
         </button>
@@ -105,7 +114,7 @@ export default function Page() {
           </thead>
           <tbody>
             {foodTypes.map((item: any) => (
-              <tr>
+              <tr key={item.id}>
                 <td>{item.name}</td>
                 <td>{item.remark}</td>
                 <td className="text-center">
