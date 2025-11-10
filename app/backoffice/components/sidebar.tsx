@@ -82,6 +82,12 @@ export default function Sidebar() {
                                     <p>รสชาติอาหาร</p>
                                 </Link>
                             </li>
+                            <li className="nav-item">
+                                <Link href="/backoffice/food" className="nav-link">
+                                <i className="nav-icon fas fa-utensils"></i>
+                                <p>อาหาร</p>
+                                </Link>
+                            </li>
                         </ul>
                     </nav>
                 </div>
