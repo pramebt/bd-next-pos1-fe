@@ -274,7 +274,8 @@ export default function Page() {
           />
         )}
         <input
-          type="myFile"
+          type="file"
+          id="myFile"
           className="form-control"
           onChange={(e) => handleSelectedFile(e)}
         />
