@@ -7,7 +7,7 @@ import Swal from "sweetalert2";
 const Page = () => {
   const [table, setTable] = useState(1);
   const [foods, setFoods] = useState([]);
-  const [saleTempDetails, setSaleTempDetails] = useState([]);
+  const [saleTemps, setSaleTemps] = useState([]);
   const myRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -66,7 +66,7 @@ const Page = () => {
   const fetchDataSaleTemp = async () => {
     try {
       const res = await axios.get(config.apiServer + "/api/saleTemp/list");
-      setSaleTempDetails(res.data.results[0]?.SaleTempDetails || []);
+      setSaleTemps(res.data.results);
     } catch (e: any) {
       Swal.fire({
         title: "error",
@@ -124,6 +124,24 @@ const Page = () => {
       });
     }
   }
+
+  const updateQty = async (id: number, qty: number) => {
+    try {
+      const payload = {
+        qty: qty,
+        id: id,
+      }
+
+      await axios.put(config.apiServer + "/api/saleTemp/updateQty", payload);
+      fetchDataSaleTemp();
+    } catch (e: any) {
+      Swal.fire({
+        title: "error",
+        text: e.message,
+        icon: "error",
+        });
+      }
+    }
   return (
     <>
       <div className="card mt-3">
@@ -164,7 +182,7 @@ const Page = () => {
                 <i className="fa fa-list me-2"></i>
                 ทั้งหมด
               </button>
-              <button className="btn btn-danger me-1" onClick={() => removeAllSaleTemp()}>
+              <button disabled={saleTemps.length == 0} className="btn btn-danger me-1" onClick={() => removeAllSaleTemp()}>
                 <i className="fa fa-trash me-2"></i>
                 ล้างรายการ
               </button>
@@ -198,27 +216,28 @@ const Page = () => {
         <div className="col-md-3">
           <div className="alert p-3 text-end h1 text-white bg-dark">0.00</div>
 
-          {saleTempDetails.map((item: any) => (
+          {saleTemps.map((item: any) => (
             <div className="d-grid mt-2" key={item.id}>
               <div className="card">
                 <div className="card-body">
                   <div className="fw-bold">{item.Food.name}</div>
+                  <div>{item.Food.price} x {item.qty} = {item.Food.price * item.qty}</div>
                   <div>
                     {item.Food.price} x 1 = {item.Food.price * 1}
                   </div>
 
                   <div className="mt-1">
                     <div className="input-group">
-                      <button className="input-group-text btn btn-primary">
+                      <button className="input-group-text btn btn-primary" onClick={() => updateQty(item.id, item.qty - 1)}>
                         <i className="fa fa-minus"></i>
                       </button>
                       <input
                         type="text"
                         className="form-control text-center fw-bold"
-                        value="1"
+                        value={item.qty}
                         disabled
                       />
-                      <button className="input-group-text btn btn-primary">
+                      <button className="input-group-text btn btn-primary" onClick={() => updateQty(item.id, item.qty + 1)}>
                         <i className="fa fa-plus"></i>
                       </button>
                     </div>
