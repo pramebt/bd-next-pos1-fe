@@ -296,9 +296,10 @@ export default function Page() {
 
         <div className="mt-3">ราคา</div>
         <input
+          type="number"
           className="form-control"
-          onChange={(e) => setPrice(parseInt(e.target.value))}
-          value={price}
+          onChange={(e) => setPrice(parseInt(e.target.value) || 0)}
+          value={price || ''}
         />
 
         <div className="mt-3">ประเภทอาหาร</div>

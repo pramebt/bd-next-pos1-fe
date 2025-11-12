@@ -66,7 +66,7 @@ const Page = () => {
   const fetchDataSaleTemp = async () => {
     try {
       const res = await axios.get(config.apiServer + "/api/saleTemp/list");
-      setSaleTempDetails(res.data.results[0].SaleTempDetails);
+      setSaleTempDetails(res.data.results[0]?.SaleTempDetails || []);
     } catch (e: any) {
       Swal.fire({
         title: "error",
@@ -76,6 +76,54 @@ const Page = () => {
     }
   };
 
+  const removeSaleTemp = async (id: number) => {
+    try {
+      const button = await Swal.fire({
+        title: "ยืนยันการลบ",
+        text: "คุณต้องการลบรายการนี้",
+        icon: "question",
+        showCancelButton: true,
+        showConfirmButton: true,
+      });
+      if (button.isConfirmed) {
+        await axios.delete(config.apiServer + "/api/saleTemp/remove/" + id);
+        fetchDataSaleTemp();
+      }
+    } catch (e: any) {
+      Swal.fire({
+        title: "error",
+        text: e.message,
+        icon: "error",
+      });
+    }
+  }
+
+  const removeAllSaleTemp = async () => {
+    try {
+      const button = await Swal.fire({
+        title: "ยืนยันการลบ",
+        text: "คุณต้องการลบรายการทั้งหมด",
+        icon: "question",
+        showCancelButton: true,
+        showConfirmButton: true,
+      });
+
+      if (button.isConfirmed) {
+        const payload = {
+          tableNo: table,
+          userId: Number(localStorage.getItem("next_user_id")),
+        }
+        await axios.delete(config.apiServer + "/api/saleTemp/removeAll", { data: payload });
+        fetchDataSaleTemp();
+      }
+    } catch (e: any) {
+      Swal.fire({
+        title: "error",
+        text: e.message,
+        icon: "error",
+      });
+    }
+  }
   return (
     <>
       <div className="card mt-3">
@@ -116,7 +164,7 @@ const Page = () => {
                 <i className="fa fa-list me-2"></i>
                 ทั้งหมด
               </button>
-              <button className="btn btn-danger me-1">
+              <button className="btn btn-danger me-1" onClick={() => removeAllSaleTemp()}>
                 <i className="fa fa-trash me-2"></i>
                 ล้างรายการ
               </button>
@@ -179,7 +227,7 @@ const Page = () => {
                 <div className="card-footer p-1">
                   <div className="row g-1">
                     <div className="col-md-6">
-                      <button className="btn btn-danger btn-block">
+                      <button className="btn btn-danger btn-block" onClick={() => removeSaleTemp(item.id)}>
                         <i className="fa fa-times me-2"></i>
                         ยกเลิก
                       </button>
