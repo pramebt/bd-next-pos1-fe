@@ -12,6 +12,8 @@ const Page = () => {
   const [tastes, setTastes] = useState([]);
   const [sizes, setSizes] = useState([]);
   const [amount, setAmount] = useState(0);
+  const [saleTempDetails, setSaleTempDetails] = useState([]);
+
 
   const myRef = useRef<HTMLInputElement>(null);
 
@@ -20,6 +22,43 @@ const Page = () => {
     fetchDataSaleTemp();
     (myRef.current as HTMLInputElement).focus();
   }, []);
+
+  const openModalEdit = (item: any) => {
+    generateSaleTempDetail(item.id);
+  };
+
+  const fetchDataSaleTempInfo = async (saleTempId: number) => {
+    try {
+      const res = await axios.get(config.apiServer + "/api/saleTemp/info/" + saleTempId);
+      setSaleTempDetails(res.data.results.SaleTempDetails);
+      setTastes(res.data.results.Food?.FoodType?.Tastes || []);
+      setSizes(res.data.results.Food?.FoodType?.FoodSizes || []);
+    } catch (e: any) {
+      Swal.fire({
+        title: "error",
+        text: e.message,
+        icon: "error",
+      });
+    }
+  }
+
+  const generateSaleTempDetail = async (saleTempId: number) => {
+    try {
+      const payload = {
+        saleTempId: saleTempId
+      };
+
+      await axios.post(config.apiServer + "/api/saleTemp/generateSaleTempDetail", payload);
+      await fetchDataSaleTemp();
+      fetchDataSaleTempInfo(saleTempId);
+    } catch (e: any) {
+      Swal.fire({
+        title: "error",
+        text: e.message,
+        icon: "error",
+      });
+    }
+  }
 
   const sumAmount = (saleTemps: any) => {
     let total = 0;
@@ -40,11 +79,6 @@ const Page = () => {
         icon: "error",
       });
     }
-  };
-
-  const openModalEdit = (item: any) => {
-    console.log(item);
-    
   };
 
   const filterFoods = async (foodType: string) => {
@@ -263,8 +297,13 @@ const Page = () => {
                       <div className="mt-1">
                         <div className="input-group">
                           <button
+                            disabled={item.SaleTempDetails.length > 0 || item.qty <= 0}
                             className="input-group-text btn btn-primary"
-                            onClick={() => updateQty(item.id, item.qty - 1)}
+                            onClick={() => {
+                              if (item.qty > 0) {
+                                updateQty(item.id, item.qty - 1);
+                              }
+                            }}
                           >
                             <i className="fa fa-minus"></i>
                           </button>
@@ -275,6 +314,7 @@ const Page = () => {
                             disabled
                           />
                           <button
+                            disabled={item.SaleTempDetails.length > 0}
                             className="input-group-text btn btn-primary"
                             onClick={() => updateQty(item.id, item.qty + 1)}
                           >
