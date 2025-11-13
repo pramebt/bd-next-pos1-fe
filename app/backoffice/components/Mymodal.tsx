@@ -3,14 +3,15 @@ import { ReactNode } from "react";
 interface ModalProps {
     id: string
     title: string
+    modalSize?: string
     children: ReactNode
 }
 
-const Modal: React.FC<ModalProps> = ({ id, title, children }) => {
+const Modal: React.FC<ModalProps> = ({ id, title, modalSize, children }) => {
     return (
         <>
             <div className="modal fade" id={id} tabIndex={-1}>
-                <div className="modal-dialog">
+                <div className={`modal-dialog ${modalSize}`}>
                     <div className="modal-content">
                         <div className="modal-header">
                             <h5 className="modal-title">{title}</h5>
