@@ -14,7 +14,6 @@ const Page = () => {
   const [amount, setAmount] = useState(0);
   const [saleTempDetails, setSaleTempDetails] = useState([]);
 
-
   const myRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -29,7 +28,9 @@ const Page = () => {
 
   const fetchDataSaleTempInfo = async (saleTempId: number) => {
     try {
-      const res = await axios.get(config.apiServer + "/api/saleTemp/info/" + saleTempId);
+      const res = await axios.get(
+        config.apiServer + "/api/saleTemp/info/" + saleTempId
+      );
       setSaleTempDetails(res.data.results.SaleTempDetails);
       setTastes(res.data.results.Food?.FoodType?.Tastes || []);
       setSizes(res.data.results.Food?.FoodType?.FoodSizes || []);
@@ -40,15 +41,18 @@ const Page = () => {
         icon: "error",
       });
     }
-  }
+  };
 
   const generateSaleTempDetail = async (saleTempId: number) => {
     try {
       const payload = {
-        saleTempId: saleTempId
+        saleTempId: saleTempId,
       };
 
-      await axios.post(config.apiServer + "/api/saleTemp/generateSaleTempDetail", payload);
+      await axios.post(
+        config.apiServer + "/api/saleTemp/generateSaleTempDetail",
+        payload
+      );
       await fetchDataSaleTemp();
       fetchDataSaleTempInfo(saleTempId);
     } catch (e: any) {
@@ -58,7 +62,7 @@ const Page = () => {
         icon: "error",
       });
     }
-  }
+  };
 
   const sumAmount = (saleTemps: any) => {
     let total = 0;
@@ -198,6 +202,72 @@ const Page = () => {
     }
   };
 
+  const selectTaste = async (
+    tasteId: number,
+    saleTempDetailId: number,
+    saleTempId: number
+  ) => {
+    try {
+      const payload = {
+        tasteId: tasteId,
+        saleTempDetailId: saleTempDetailId,
+      };
+
+      await axios.put(config.apiServer + "/api/saleTemp/selectTaste", payload);
+      fetchDataSaleTempInfo(saleTempId);
+    } catch (e: any) {
+      Swal.fire({
+        title: "error",
+        text: e.message,
+        icon: "error",
+      });
+    }
+  };
+
+  const unselectTaste = async (
+    saleTempDetailId: number,
+    saleTempId: number
+  ) => {
+    try {
+      const payload = {
+        saleTempDetailId: saleTempDetailId,
+      };
+
+      await axios.put(
+        config.apiServer + "/api/saleTemp/unselectTaste",
+        payload
+      );
+      fetchDataSaleTempInfo(saleTempId);
+    } catch (e: any) {
+      Swal.fire({
+        title: "error",
+        text: e.message,
+        icon: "error",
+      });
+    }
+  };
+
+  const selectSize = async (
+    sizeId: number,
+    saleTempDetailId: number,
+    saleTempId: number
+  ) => {
+    try {
+      const payload = {
+        sizeId: sizeId,
+        saleTempDetailId: saleTempDetailId,
+      };
+
+      await axios.put(config.apiServer + "/api/saleTemp/selectSize", payload);
+      fetchDataSaleTempInfo(saleTempId);
+    } catch (e: any) {
+      Swal.fire({
+        title: "error",
+        text: e.message,
+        icon: "error",
+      });
+    }
+  };
   return (
     <>
       <div className="card mt-3">
@@ -297,7 +367,9 @@ const Page = () => {
                       <div className="mt-1">
                         <div className="input-group">
                           <button
-                            disabled={item.SaleTempDetails.length > 0 || item.qty <= 0}
+                            disabled={
+                              item.SaleTempDetails.length > 0 || item.qty <= 0
+                            }
                             className="input-group-text btn btn-primary"
                             onClick={() => {
                               if (item.qty > 0) {
@@ -339,7 +411,7 @@ const Page = () => {
                             className="btn btn-success btn-block"
                             data-bs-toggle="modal"
                             data-bs-target="#modalEdit"
-                            onClick = {e => openModalEdit(item)}
+                            onClick={(e) => openModalEdit(item)}
                           >
                             <i className="fa fa-cog me-2"></i>
                             แก้ไข
@@ -365,13 +437,77 @@ const Page = () => {
         <table className="table table-bordered mt-3">
           <thead>
             <tr>
-              <th style={{ width: "68px" }}></th>
+              <th style={{ width: "60px" }}></th>
               <th>ชื่ออาหาร</th>
-              <th style={{ width: "200px" }}>รสชาติ</th>
-              <th style={{ width: "200px" }}>ขนาด</th>
+              <th className="text-center" style={{ width: "300px" }}>
+                รสชาติ
+              </th>
+              <th className="text-center" style={{ width: "300px" }}>
+                ขนาด
+              </th>
             </tr>
           </thead>
-          <tbody></tbody>
+          <tbody>
+            {saleTempDetails.map((item: any) => (
+              <tr key={item.id}>
+                <td className="text-center">
+                  <button className="btn btn-danger">
+                    <i className="fa fa-times"></i>
+                  </button>
+                </td>
+                <td>{item.Food.name}</td>
+                <td className="text-center">
+                  {tastes.map((taste: any) =>
+                    item.tasteId === taste.id ? (
+                      <button
+                        onClick={(e) => unselectTaste(item.id, item.saleTempId)}
+                        className="btn btn-danger me-1"
+                        key={taste.id}
+                      >
+                        {taste.name}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={(e) =>
+                          selectTaste(taste.id, item.id, item.saleTempId)
+                        }
+                        className="btn btn-outline-danger me-1"
+                        key={taste.id}
+                      >
+                        {taste.name}
+                      </button>
+                    )
+                  )}
+                </td>
+                <td className="text-center">
+                  {sizes.map((size: any) =>
+                    size.moneyAdded > 0 ? (
+                      item.foodSizeId === size.id ? (
+                        <button 
+                        onClick={(e) => unselectSize(item.id, item.saleTempId)}
+                        className="btn btn-success me-1" 
+                        key={size.id}>
+                          +{size.moneyAdded} {size.name}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={(e) =>
+                            selectSize(size.id, item.id, item.saleTempId)
+                          }
+                          className="btn btn-outline-success me-1"
+                          key={size.id}
+                        >
+                          +{size.moneyAdded} {size.name}
+                        </button>
+                      )
+                    ) : (
+                      <></>
+                    )
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </Modal>
     </>
