@@ -12,7 +12,9 @@ const Page = () => {
   const [tastes, setTastes] = useState([]);
   const [sizes, setSizes] = useState([]);
   const [amount, setAmount] = useState(0);
+  const [amountAdded, setAmountAdded] = useState(0);
   const [saleTempDetails, setSaleTempDetails] = useState([]);
+  const [saleTempId, setSaleTempId] = useState(0);
 
   const myRef = useRef<HTMLInputElement>(null);
 
@@ -23,6 +25,7 @@ const Page = () => {
   }, []);
 
   const openModalEdit = (item: any) => {
+    setSaleTempId(item.id);
     generateSaleTempDetail(item.id);
   };
 
@@ -34,6 +37,7 @@ const Page = () => {
       setSaleTempDetails(res.data.results.SaleTempDetails);
       setTastes(res.data.results.Food?.FoodType?.Tastes || []);
       setSizes(res.data.results.Food?.FoodType?.FoodSizes || []);
+
     } catch (e: any) {
       Swal.fire({
         title: "error",
@@ -41,6 +45,17 @@ const Page = () => {
         icon: "error",
       });
     }
+  };
+
+  const sumMoneyAdded = (saleTempDetails: any) => {
+    let sum = 0;
+
+    for (let i = 0; i < saleTempDetails.length; i++) {
+      const detail = saleTempDetails[i];
+      sum += detail.FoodSize?.moneyAdded ?? 0;
+    }
+
+    return sum;
   };
 
   const generateSaleTempDetail = async (saleTempId: number) => {
@@ -124,6 +139,15 @@ const Page = () => {
       const res = await axios.get(config.apiServer + "/api/saleTemp/list");
       setSaleTemps(res.data.results);
       sumAmount(res.data.results);
+
+      const results = res.data.results;
+      let sum = 0;
+
+      results.forEach((item: any) => {
+        sum += sumMoneyAdded(item.SaleTempDetails);
+      })
+
+      setAmountAdded(sum);
     } catch (e: any) {
       Swal.fire({
         title: "error",
@@ -259,7 +283,8 @@ const Page = () => {
       };
 
       await axios.put(config.apiServer + "/api/saleTemp/selectSize", payload);
-      fetchDataSaleTempInfo(saleTempId);
+      await fetchDataSaleTempInfo(saleTempId);
+      await fetchDataSaleTemp();
     } catch (e: any) {
       Swal.fire({
         title: "error",
@@ -268,6 +293,42 @@ const Page = () => {
       });
     }
   };
+
+  const unselectSize = async (saleTempDetailId: number, saleTempId: number) => {
+    try {
+      const payload = {
+        saleTempDetailId: saleTempDetailId,
+      };
+
+      await axios.put(config.apiServer + "/api/saleTemp/unselectSize", payload);
+      await fetchDataSaleTempInfo(saleTempId);
+      await fetchDataSaleTemp();
+    } catch (e: any) {
+      Swal.fire({
+        title: "error",
+        text: e.message,
+        icon: "error",
+      });
+    }
+  };
+
+  const createSaleTempDetail = async () => {
+    try {
+      const payload = {
+        saleTempId: saleTempId,
+      }
+      await axios.post(config.apiServer + "/api/saleTemp/createSaleTempDetail", payload);
+      await fetchDataSaleTemp();
+      fetchDataSaleTempInfo(saleTempId);
+    } catch (e: any) {
+      Swal.fire({
+        title: "error",
+        text: e.message,
+        icon: "error",
+      });
+    }
+  }
+
   return (
     <>
       <div className="card mt-3">
@@ -348,7 +409,7 @@ const Page = () => {
 
             <div className="col-md-3">
               <div className="alert p-3 text-end h1 text-white bg-dark">
-                {amount.toLocaleString("th-TH")}
+                {(amount + amountAdded).toLocaleString("th-TH")}
               </div>
 
               {saleTemps.map((item: any) => (
@@ -359,9 +420,6 @@ const Page = () => {
                       <div>
                         {item.Food.price} x {item.qty} ={" "}
                         {item.Food.price * item.qty}
-                      </div>
-                      <div>
-                        {item.Food.price} x 1 = {item.Food.price * 1}
                       </div>
 
                       <div className="mt-1">
@@ -429,7 +487,7 @@ const Page = () => {
 
       <Modal id="modalEdit" title="แก้ไขรายการ" modalSize="modal-xl">
         <div>
-          <button className="btn btn-primary">
+          <button className="btn btn-primary" onClick={() => createSaleTempDetail()}>
             <i className="fa fa-plus me-2"></i>
             เพิ่มรายการ
           </button>
@@ -483,10 +541,13 @@ const Page = () => {
                   {sizes.map((size: any) =>
                     size.moneyAdded > 0 ? (
                       item.foodSizeId === size.id ? (
-                        <button 
-                        onClick={(e) => unselectSize(item.id, item.saleTempId)}
-                        className="btn btn-success me-1" 
-                        key={size.id}>
+                        <button
+                          onClick={(e) =>
+                            unselectSize(item.id, item.saleTempId)
+                          }
+                          className="btn btn-success me-1"
+                          key={size.id}
+                        >
                           +{size.moneyAdded} {size.name}
                         </button>
                       ) : (
