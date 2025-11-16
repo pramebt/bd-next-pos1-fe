@@ -15,7 +15,8 @@ const Page = () => {
   const [amountAdded, setAmountAdded] = useState(0);
   const [saleTempDetails, setSaleTempDetails] = useState([]);
   const [saleTempId, setSaleTempId] = useState(0);
-
+  const [payType, setPayType] = useState("cash");
+  const [inputMoney, setInputMoney] = useState(0);
   const myRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -37,7 +38,6 @@ const Page = () => {
       setSaleTempDetails(res.data.results.SaleTempDetails);
       setTastes(res.data.results.Food?.FoodType?.Tastes || []);
       setSizes(res.data.results.Food?.FoodType?.FoodSizes || []);
-
     } catch (e: any) {
       Swal.fire({
         title: "error",
@@ -145,8 +145,9 @@ const Page = () => {
 
       results.forEach((item: any) => {
         sum += sumMoneyAdded(item.SaleTempDetails);
-      })
+      });
 
+      sumAmount(results);
       setAmountAdded(sum);
     } catch (e: any) {
       Swal.fire({
@@ -316,8 +317,11 @@ const Page = () => {
     try {
       const payload = {
         saleTempId: saleTempId,
-      }
-      await axios.post(config.apiServer + "/api/saleTemp/createSaleTempDetail", payload);
+      };
+      await axios.post(
+        config.apiServer + "/api/saleTemp/createSaleTempDetail",
+        payload
+      );
       await fetchDataSaleTemp();
       fetchDataSaleTempInfo(saleTempId);
     } catch (e: any) {
@@ -327,15 +331,18 @@ const Page = () => {
         icon: "error",
       });
     }
-  }
-  
+  };
+
   const removeSaleTempDetail = async (saleTempDetailId: number) => {
     try {
       const payload = {
         saleTempDetailId: saleTempDetailId,
       };
 
-      await axios.delete(config.apiServer + "/api/saleTemp/removeSaleTempDetail", { data: payload });
+      await axios.delete(
+        config.apiServer + "/api/saleTemp/removeSaleTempDetail",
+        { data: payload }
+      );
       await fetchDataSaleTemp();
       fetchDataSaleTempInfo(saleTempId);
     } catch (e: any) {
@@ -345,9 +352,7 @@ const Page = () => {
         icon: "error",
       });
     }
-  }
-
-  
+  };
 
   return (
     <>
@@ -432,6 +437,19 @@ const Page = () => {
                 {(amount + amountAdded).toLocaleString("th-TH")}
               </div>
 
+              {amount > 0 ? (
+                <button
+                  className="btn btn-success btn-block btn-lg pt-3 pb-3 mb-2"
+                  data-bs-toggle="modal"
+                  data-bs-target="#modalSale"
+                >
+                  <i className="fa fa-check me-2"></i>
+                  จบการขาย
+                </button>
+              ) : (
+                <></>
+              )}
+
               {saleTemps.map((item: any) => (
                 <div className="d-grid mt-2" key={item.id}>
                   <div className="card">
@@ -507,7 +525,10 @@ const Page = () => {
 
       <Modal id="modalEdit" title="แก้ไขรายการ" modalSize="modal-xl">
         <div>
-          <button className="btn btn-primary" onClick={() => createSaleTempDetail()}>
+          <button
+            className="btn btn-primary"
+            onClick={() => createSaleTempDetail()}
+          >
             <i className="fa fa-plus me-2"></i>
             เพิ่มรายการ
           </button>
@@ -529,7 +550,10 @@ const Page = () => {
             {saleTempDetails.map((item: any) => (
               <tr key={item.id}>
                 <td className="text-center">
-                  <button className="btn btn-danger" onClick={() => removeSaleTempDetail(item.id)}>
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => removeSaleTempDetail(item.id)}
+                  >
                     <i className="fa fa-times"></i>
                   </button>
                 </td>
@@ -590,6 +614,125 @@ const Page = () => {
             ))}
           </tbody>
         </table>
+      </Modal>
+      <Modal id="modalSale" title="จบการขาย">
+        <div className="fw-bold">รูปแบบการขำระ</div>
+        <div className="row mt-1">
+          <div className="col-md-6">
+            <button
+              className={
+                payType == "cash"
+                  ? "btn btn-primary btn-block btn-lg"
+                  : "btn btn-outline-secondary btn-block btn-lg"
+              }
+              onClick={() => setPayType("cash")}
+            >
+              <span className="h3">เงินสด</span>
+            </button>
+          </div>
+          <div className="col-md-6">
+            <button
+              className={
+                payType == "transfer"
+                  ? "btn btn-primary btn-block btn-lg"
+                  : "btn btn-outline-secondary btn-block btn-lg"
+              }
+              onClick={() => setPayType("transfer")}
+            >
+              <span className="h3">เงินโอน</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-3 fw-bold">ยอดเงิน</div>
+        <div className="h1">
+          <input
+            className="form-control text-end fs-4 p-4"
+            value={(amount + amountAdded).toLocaleString("th-TH")}
+            disabled
+          />
+        </div>
+
+        <div className="mt-3 fw-bold">รับเงิน</div>
+        <div className="row mt-1">
+          <div className="col-md-3">
+            <button
+              className={
+                inputMoney == 50
+                  ? "btn btn-primary btn-block btn-lg"
+                  : "btn btn-outline-secondary btn-block btn-lg"
+              }
+              onClick={() => setInputMoney(50)}
+            >
+              50
+            </button>
+          </div>
+          <div className="col-md-3">
+            <button
+              className={
+                inputMoney == 100
+                  ? "btn btn-primary btn-block btn-lg"
+                  : "btn btn-outline-secondary btn-block btn-lg"
+              }
+              onClick={() => setInputMoney(100)}
+            >
+              100
+            </button>
+          </div>
+          <div className="col-md-3">
+            <button
+              className={
+                inputMoney == 500
+                  ? "btn btn-primary btn-block btn-lg"
+                  : "btn btn-outline-secondary btn-block btn-lg"
+              }
+              onClick={() => setInputMoney(500)}
+            >
+              500
+            </button>
+          </div>
+          <div className="col-md-3">
+            <button
+              className={
+                inputMoney == 1000
+                  ? "btn btn-primary btn-block btn-lg"
+                  : "btn btn-outline-secondary btn-block btn-lg"
+              }
+              onClick={() => setInputMoney(1000)}
+            >
+              1000
+            </button>
+          </div>
+        </div>
+        <input
+          className="form-control form-control-lg mt-3 border border-dark text-end"
+          placeholder="0.00"
+          value={inputMoney}
+          onChange={(e) => setInputMoney(Number(e.target.value))}
+        />
+        <div className="mt-3 fw-bold">เงินทอน</div>
+        <div className="h1">
+          <input
+            className="form-control text-end fs-4 p-4"
+            value={inputMoney - (amount + amountAdded)}
+            disabled
+          />
+        </div>
+
+        <div className="row">
+          <div className="col-md-6">
+            <button 
+            onClick={() => setInputMoney(amount + amountAdded)}
+            className="btn btn-primary btn-block btn-lg">
+              จ่ายพอดี
+            </button>
+          </div>
+          <div className="col-md-6">
+            <button className="btn btn-success btn-block btn-lg">
+              จบการขาย
+            </button>
+          </div>
+        </div>
       </Modal>
     </>
   );
