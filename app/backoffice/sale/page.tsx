@@ -328,6 +328,26 @@ const Page = () => {
       });
     }
   }
+  
+  const removeSaleTempDetail = async (saleTempDetailId: number) => {
+    try {
+      const payload = {
+        saleTempDetailId: saleTempDetailId,
+      };
+
+      await axios.delete(config.apiServer + "/api/saleTemp/removeSaleTempDetail", { data: payload });
+      await fetchDataSaleTemp();
+      fetchDataSaleTempInfo(saleTempId);
+    } catch (e: any) {
+      Swal.fire({
+        title: "error",
+        text: e.message,
+        icon: "error",
+      });
+    }
+  }
+
+  
 
   return (
     <>
@@ -509,7 +529,7 @@ const Page = () => {
             {saleTempDetails.map((item: any) => (
               <tr key={item.id}>
                 <td className="text-center">
-                  <button className="btn btn-danger">
+                  <button className="btn btn-danger" onClick={() => removeSaleTempDetail(item.id)}>
                     <i className="fa fa-times"></i>
                   </button>
                 </td>
