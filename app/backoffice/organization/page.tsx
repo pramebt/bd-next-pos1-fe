@@ -22,42 +22,31 @@ const OrganizationPage = () => {
 
   const uploadFile = async () => {
     const formData = new FormData();
-    formData.append("myFile", fileSelected as Blob);
+    formData.append("file", fileSelected as Blob);
     
     const res = await axios.post(config.apiServer + "/api/organization/upload", formData);
-    return res.data.fileName;
+    setLogo(res.data.fileName);
   }
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
-    try {
+    
       const res = await axios.get(config.apiServer + "/api/organization/info");
-      if (res.data.results) {
-        setName(res.data.results.name || "");
-        setPhone(res.data.results.phone || "");
-        setAddress(res.data.results.address || "");
-        setEmail(res.data.results.email || "");
-        setWebsite(res.data.results.website || "");
-        setLogo(res.data.results.logo || "");
-        setTaxCode(res.data.results.taxCode || "");
-        setPromptpay(res.data.results.promptpay || "");
-      }
-    } catch (e: any) {
-      console.error("Error fetching organization data:", e);
-    }
+        setName(res.data.results.name);
+        setPhone(res.data.results.phone);
+        setAddress(res.data.results.address);
+        setEmail(res.data.results.email);
+        setWebsite(res.data.results.website);
+        setLogo(res.data.results.logo);
+        setTaxCode(res.data.results.taxCode);
+        setPromptpay(res.data.results.promptpay);
   };
 
   const save = async () => {
     try {
-      let fileName = logo;
-      
-      // Upload new file if selected
-      if (fileSelected) {
-        fileName = await uploadFile();
-      }
-      
+      const fileName = await uploadFile();
       const payload = {
         name: name,
         phone: phone,
@@ -76,9 +65,6 @@ const OrganizationPage = () => {
         text: "บันทึกข้อมูลสำเร็จ",
         icon: "success",
       });
-      
-      fetchData();
-      setFileSelected(null);
     } catch (e: any) {
       Swal.fire({
         title: "error",

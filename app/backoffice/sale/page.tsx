@@ -380,6 +380,64 @@ const Page = () => {
       });
     }
   };
+  
+  const endSale = async () => {
+    try {
+      const button = await Swal.fire({
+        title: "ยืนยันการจบการขาย",
+        text: "คุณต้องการจบการขาย",
+        icon: "question",
+        showCancelButton: true,
+        showConfirmButton: true,
+      });
+
+      if (button.isConfirmed) {
+        const payload = {
+          tableNo: table,
+          userId: Number(localStorage.getItem("next_user_id")),
+          payType: payType,
+          inputMoney: inputMoney,
+          amount: amount + amountAdded,
+          returnMoney: inputMoney - (amount + amountAdded),
+        };
+        await axios.post(config.apiServer + "/api/saleTemp/endSale", payload);
+        
+        fetchDataSaleTemp();
+
+        document.getElementById('modaleSale_btnClose')?.click();
+        printBillAfterPay();
+      }
+    } catch (e: any) {
+      Swal.fire({
+        title: "error",
+        text: e.message,
+        icon: "error",
+      });
+    }
+  };
+
+  const printBillAfterPay = async () => {
+    try {
+      const payload = {
+        tableNo: table,
+        userId: Number(localStorage.getItem("next_user_id")),
+      }
+
+      const res = await axios.post(config.apiServer + "/api/saleTemp/printBillAfterPay", payload);
+
+      setTimeout(() => {
+        setBillUrl(res.data.fileName);
+        const button = document.getElementById("btnPrint") as HTMLButtonElement;
+        button.click();
+      }, 300);
+    } catch (e: any) {
+      Swal.fire({
+        title: "error",
+        text: e.message,
+        icon: "error",
+      });
+    }
+  }
   return (
     <>
       <div className="card mt-3">
@@ -766,7 +824,10 @@ const Page = () => {
             </button>
           </div>
           <div className="col-md-6">
-            <button className="btn btn-success btn-block btn-lg">
+            <button 
+            disabled={inputMoney - (amount + amountAdded) < 0}
+            onClick={(e) => endSale()}
+            className="btn btn-success btn-block btn-lg">
               จบการขาย
             </button>
           </div>
