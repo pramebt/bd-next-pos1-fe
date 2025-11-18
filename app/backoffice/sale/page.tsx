@@ -353,7 +353,26 @@ const Page = () => {
       });
     }
   };
+  
 
+  const printBillBeforePay = async () => {
+    try {
+      const payload = {
+
+        tableNo: table,
+        userId: Number(localStorage.getItem("next_user_id")),
+      }
+      
+      const res = await axios.post(config.apiServer + "/api/saleTemp/printBillBeforePay", payload);
+      console.log(res.data.results);
+    } catch (e: any) {
+      Swal.fire({
+        title: "error",
+        text: e.message,
+        icon: "error",
+      });
+    }
+  };
   return (
     <>
       <div className="card mt-3">
@@ -402,6 +421,15 @@ const Page = () => {
                 <i className="fa fa-trash me-2"></i>
                 ล้างรายการ
               </button>
+              {amount > 0 ? (
+                <button
+                  className="btn btn-success ms-1"
+                  onClick={() => printBillBeforePay()}
+                >
+                  <i className="fa fa-print me-2"></i>
+                  พิมพ์ใบแจ้งรายการ
+                </button>
+              ) : <></>}
             </div>
           </div>
           <div className="row mt-3">
