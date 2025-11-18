@@ -17,6 +17,7 @@ const Page = () => {
   const [saleTempId, setSaleTempId] = useState(0);
   const [payType, setPayType] = useState("cash");
   const [inputMoney, setInputMoney] = useState(0);
+  const [billUrl, setBillUrl] = useState("");
   const myRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -353,18 +354,24 @@ const Page = () => {
       });
     }
   };
-  
 
   const printBillBeforePay = async () => {
     try {
       const payload = {
-
         tableNo: table,
         userId: Number(localStorage.getItem("next_user_id")),
-      }
-      
-      const res = await axios.post(config.apiServer + "/api/saleTemp/printBillBeforePay", payload);
-      console.log(res.data.results);
+      };
+
+      const res = await axios.post(
+        config.apiServer + "/api/saleTemp/printBillBeforePay",
+        payload
+      );
+      setTimeout(() => {
+        setBillUrl(res.data.fileName);
+
+        const button = document.getElementById("btnPrint") as HTMLButtonElement;
+        button.click();
+      }, 500);
     } catch (e: any) {
       Swal.fire({
         title: "error",
@@ -429,7 +436,9 @@ const Page = () => {
                   <i className="fa fa-print me-2"></i>
                   พิมพ์ใบแจ้งรายการ
                 </button>
-              ) : <></>}
+              ) : (
+                <></>
+              )}
             </div>
           </div>
           <div className="row mt-3">
@@ -749,9 +758,10 @@ const Page = () => {
 
         <div className="row">
           <div className="col-md-6">
-            <button 
-            onClick={() => setInputMoney(amount + amountAdded)}
-            className="btn btn-primary btn-block btn-lg">
+            <button
+              onClick={() => setInputMoney(amount + amountAdded)}
+              className="btn btn-primary btn-block btn-lg"
+            >
               จ่ายพอดี
             </button>
           </div>
@@ -761,6 +771,20 @@ const Page = () => {
             </button>
           </div>
         </div>
+      </Modal>
+
+      <button
+        id="btnPrint"
+        style={{ display: "none" }}
+        data-bs-toggle="modal"
+        data-bs-target="#modalPrint"
+      ></button>
+      <Modal id="modalPrint" title="พิมพ์เอกสาร">
+        {billUrl && (
+          <div className="text-center">
+            <iframe src={config.apiServer + "/" + billUrl} width="100%" height="600px"></iframe>
+          </div>
+        )}
       </Modal>
     </>
   );
