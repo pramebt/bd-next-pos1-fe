@@ -106,6 +106,12 @@ export default function Sidebar() {
                                     <p>รายงานการขาย</p>
                                 </Link>
                             </li>
+                            <li className="nav-item">
+                                <Link href="/backoffice/report-sum-sale-per-day" className="nav-link">
+                                    <i className="nav-icon fas fa-calendar"></i>
+                                    <p>สรุปยอดขายรายวัน</p>
+                                </Link>
+                            </li>
                         </ul>
                     </nav>
                 </div>
