@@ -82,7 +82,6 @@ const Page = () => {
 
   const sumAmount = (saleTemps: any) => {
     let total = 0;
-    console.log(saleTemps.length);
     saleTemps.forEach((item: any) => (total += item.Food.price * item.qty));
 
     setAmount(total);

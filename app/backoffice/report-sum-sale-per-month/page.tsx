@@ -22,8 +22,11 @@ export default function ReportSumSalePerMonth() {
             const payload = {
                 year: selectedYear
             }
-
-            const res = await axios.post(config.apiServer + '/api/report/sumPerMonthInYear', payload);
+            
+            const headers = {
+                Authorization: `Bearer ${localStorage.getItem(config.token)}`
+            }
+            const res = await axios.post(config.apiServer + '/api/report/sumPerMonthInYear', payload, { headers });
             setData(res.data.results)
             setTotalAmount(sumTotalAmount(res.data.results))
         } catch (e: any) {
