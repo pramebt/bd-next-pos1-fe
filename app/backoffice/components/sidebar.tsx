@@ -149,6 +149,12 @@ export default function Sidebar() {
                     </Link>
                   </li>
                   <li className="nav-item">
+                    <Link href="/backoffice/food-paginate" className="nav-link">
+                      <i className="nav-icon fas fa-utensils"></i>
+                      <p>อาหาร (แบ่งหน้า)</p>
+                    </Link>
+                  </li>
+                  <li className="nav-item">
                     <Link href="/backoffice/user" className="nav-link">
                       <i className="nav-icon fas fa-users"></i>
                       <p>ผู้ใช้งาน</p>
