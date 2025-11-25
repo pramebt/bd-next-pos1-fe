@@ -1,4 +1,4 @@
 export default {
-    apiServer: 'http://localhost:3001',
+    apiServer: 'https://bd-next-pos1-api.onrender.com',
     token: 'my-secret-token',
 }
