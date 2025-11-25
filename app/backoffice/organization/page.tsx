@@ -22,31 +22,45 @@ const OrganizationPage = () => {
 
   const uploadFile = async () => {
     const formData = new FormData();
-    formData.append("file", fileSelected as Blob);
+    formData.append("myFile", fileSelected as Blob);
     
     const res = await axios.post(config.apiServer + "/api/organization/upload", formData);
     setLogo(res.data.fileName);
+    return res.data.fileName;
   }
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
-    
+    try {
       const res = await axios.get(config.apiServer + "/api/organization/info");
-        setName(res.data.results.name);
-        setPhone(res.data.results.phone);
-        setAddress(res.data.results.address);
-        setEmail(res.data.results.email);
-        setWebsite(res.data.results.website);
-        setLogo(res.data.results.logo);
-        setTaxCode(res.data.results.taxCode);
-        setPromptpay(res.data.results.promptpay);
+      
+      // Check if organization data exists
+      if (res.data.results) {
+        setName(res.data.results.name || "");
+        setPhone(res.data.results.phone || "");
+        setAddress(res.data.results.address || "");
+        setEmail(res.data.results.email || "");
+        setWebsite(res.data.results.website || "");
+        setLogo(res.data.results.logo || "");
+        setTaxCode(res.data.results.taxCode || "");
+        setPromptpay(res.data.results.promptpay || "");
+      }
+    } catch (error) {
+      // No organization yet, fields will remain empty for first-time setup
+      console.log("Organization not found - first time setup");
+    }
   };
 
   const save = async () => {
     try {
-      const fileName = await uploadFile();
+      // Only upload if a new file was selected
+      let finalLogo = logo;
+      if (fileSelected) {
+        finalLogo = await uploadFile();
+      }
+      
       const payload = {
         name: name,
         phone: phone,
@@ -54,7 +68,7 @@ const OrganizationPage = () => {
         email: email,
         website: website,
         promptpay: promptpay,
-        logo: fileName,
+        logo: finalLogo,
         taxCode: taxCode,
       };
 
@@ -65,6 +79,9 @@ const OrganizationPage = () => {
         text: "บันทึกข้อมูลสำเร็จ",
         icon: "success",
       });
+      
+      // Refresh data after save
+      await fetchData();
     } catch (e: any) {
       Swal.fire({
         title: "error",
